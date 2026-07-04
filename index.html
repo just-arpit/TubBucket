@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TubBucket — Your Streaming Everything</title>
+    <meta name="description" content="Discover 108+ curated streaming platforms for movies, anime, manga, live TV and sports. All free, all in one place.">
+    <meta name="theme-color" content="#07070f">
+    
+    <!-- Open Graph / SEO -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tubbucket.vercel.app/">
+    <meta property="og:title" content="TubBucket — Your Streaming Everything">
+    <meta property="og:description" content="Discover 108+ curated streaming platforms for movies, anime, manga, live TV and sports. All free, all in one place.">
+    <meta property="og:image" content="./logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="TubBucket — Your Streaming Everything">
+    <meta property="twitter:description" content="Discover 108+ curated streaming platforms for movies, anime, manga, live TV and sports. All free, all in one place.">
+    <meta property="twitter:image" content="./logo.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/png" href="./logo.png">
+    <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+
+<!-- AURORA BG -->
+<div class="aurora" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="blob b4"></div>
+</div>
+
+<div class="wrap">
+
+    <!-- ====== NAVIGATION ====== -->
+    <nav class="nav">
+        <a href="/" class="logo" aria-label="TubBucket home">
+            <div class="logo-icon">
+                <img src="./logo.png" alt="TubBucket Logo">
+            </div>
+            Tub<span class="logo-grad">Bucket</span>
+        </a>
+
+        <div class="nav-center">
+            <a href="#cat-movies" class="nav-link">Movies</a>
+            <a href="#cat-anime" class="nav-link">Anime</a>
+            <a href="#cat-manga" class="nav-link">Manga</a>
+            <a href="#cat-livetv" class="nav-link">Live TV</a>
+            <a href="#cat-paid" class="nav-link">Paid</a>
+            <a href="#cat-apps" class="nav-link">Apps</a>
+        </div>
+
+        <div class="nav-end">
+            <button class="btn-pill" id="favNavBtn">
+                ⭐ Favorites
+                <span class="badge" id="fnav">0</span>
+            </button>
+            <button class="btn-icon" id="themeBtn" aria-label="Toggle theme">🌙</button>
+        </div>
+    </nav>
+
+    <!-- ====== HERO ====== -->
+    <section class="hero">
+        <div class="hero-glass">
+            <div>
+                <p class="eyebrow">108+ Platforms · 6 Categories · Always Free</p>
+                <h1>Every stream,<br><span class="grad">one bucket.</span></h1>
+                <p class="hero-sub">
+                    TubBucket curates the best free streaming platforms on the internet
+                    — movies, anime, manga, live TV &amp; more. No sign-up, no noise, just streams.
+                </p>
+                <div class="pill-row">
+                    <span class="stat-pill">🎬 <strong>108+</strong>&nbsp;Platforms</span>
+                    <span class="stat-pill">⚡ <strong>Instant</strong>&nbsp;Search</span>
+                    <span class="stat-pill">⭐ <strong>Favorites</strong>&nbsp;Saved Locally</span>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-n">24</div><div class="stat-l">Movies</div></div>
+                <div class="stat-card"><div class="stat-n">24</div><div class="stat-l">Anime</div></div>
+                <div class="stat-card"><div class="stat-n">21</div><div class="stat-l">Manga</div></div>
+                <div class="stat-card"><div class="stat-n">17</div><div class="stat-l">Live TV</div></div>
+                <div class="stat-card"><div class="stat-n">13</div><div class="stat-l">Paid</div></div>
+                <div class="stat-card"><div class="stat-n">9</div><div class="stat-l">Apps</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== CONTROLS ====== -->
+    <div class="controls">
+        <div class="controls-inner">
+            <div class="search-wrap">
+                <span class="search-ic">🔍</span>
+                <input
+                    class="search-input"
+                    id="si"
+                    type="text"
+                    placeholder="Search sites or URLs…  (Ctrl+K)"
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+                <button class="search-clear" id="sc">✕</button>
+            </div>
+            <div class="tabs-outer">
+                <div class="tabs" id="tabs">
+                    <button class="tab active" data-cat="all">All <span class="tab-ct">108</span></button>
+                    <button class="tab" data-cat="movies">🎬 Movies &amp; Shows <span class="tab-ct">24</span></button>
+                    <button class="tab" data-cat="anime">⛩️ Anime <span class="tab-ct">24</span></button>
+                    <button class="tab" data-cat="manga">📖 Manga <span class="tab-ct">21</span></button>
+                    <button class="tab" data-cat="livetv">📺 Live TV &amp; Sports <span class="tab-ct">17</span></button>
+                    <button class="tab" data-cat="paid">💎 Paid <span class="tab-ct">13</span></button>
+                    <button class="tab" data-cat="apps">📱 Apps <span class="tab-ct">9</span></button>
+                    <button class="tab" data-cat="favorites" id="ftab">⭐ Favorites <span class="tab-ct" id="fct">0</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <main class="content" id="content"></main>
+
+    <footer>
+        <div class="footer-logo">
+            <img src="./logo.png" alt="" width="32" height="32" style="border-radius:8px">
+            <span>TubBucket</span>
+        </div>
+        <br>Discover your next obsession · Built with ♥ for streamers everywhere<br>
+        <small style="opacity:.5">All links lead to external sites. TubBucket is a directory only &amp; does not host any content.</small>
+    </footer>
+
+</div><!-- /wrap -->
+
+<!-- SCROLL TO TOP -->
+<button class="to-top" id="totop" aria-label="Scroll to top">↑</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
