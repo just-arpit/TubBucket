@@ -230,6 +230,27 @@ button { font-family: inherit; cursor: pointer; }
   .region-caret { display: none; }
 }
 
+/* NAV: Mobile compressions for small phones */
+@media (max-width: 520px) {
+  .nav { height: 56px; padding: 0 .9rem; }
+  .logo { font-size: 1.15rem; gap: .45rem; }
+  .logo-icon { width: 36px; height: 36px; border-radius: 10px; }
+  .nav-center { display: none; }
+  .nav-end { gap: .4rem; }
+
+  /* Make favorites pill compact: show only emoji and badge */
+  .btn-pill { padding: .28rem .45rem; border-radius: 10px; min-width: 40px; }
+  .btn-pill .btn-label { display: none; }
+  .btn-pill .fav-emoji { font-size: 1.05rem; line-height:1; display:inline-block; }
+  .badge { min-width: 16px; padding: .12rem .32rem; font-size: .62rem; }
+
+  /* Theme button smaller */
+  .btn-icon { width: 34px; height: 34px; font-size: .9rem; }
+
+  /* Region pill already compresses; ensure it aligns with other controls */
+  .region-pill { margin-inline-start: 4px; }
+}
+
 /* shared button bases */
 .btn-pill {
   display: inline-flex;
