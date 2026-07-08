@@ -232,6 +232,57 @@ function loadRegion() {
 function saveRegion(r) { try { localStorage.setItem('sv_region', r); } catch (e) {} }
 let region = loadRegion();
 
+// When India region is selected we show exactly this allowlist (domains only)
+const INDIA_ALLOWLIST = new Set([
+  // Movies & Shows (from screenshots)
+  'prmovies.farm','desicinemas.pk','moviesbazar.su','bollyflix.at','netnaija.film','5movierulz.limited',
+  'vegamovie.ss','hindilinks4u.ventures','multimovies.wtf','kmmovies.life','new1.hdhub4u.limo','new3.movies4u.finance',
+  'moviesmod.at','world4ufree.at','net11.cc','fitnur.com','thenextplanet.surf','watch.yupflix.org','1tamilblasters.pro','cinephile.live',
+
+  // Anime
+  'ag48anime.site','watchanimeworld.net','animejoker.com','desidubanime.me','animedekho.app','animelok.net','animesalt.ac','animepahe.pw','rareanimes.mov','animesogo.to',
+
+  // Manga
+  'natomanga.com',
+
+  // Live TV
+  'tarangplus.in',
+
+  // Paid
+  'hotstar.com','yupptv.com','shudder.com','hulu.com','netflix.com','viki.com','hbomax.com','tv.apple.com','primevideo.com','paramountplus.com','crunchyroll.com','mgmplus.com','peacocktv.com','amcplus.com','aha.video',
+
+  // Apps
+  'playtorrio.pages.dev','onstreamapks.app','uvotv.com','hdobox.net','beetvs.com.co','moviesbox.com.co','netmirror.gg','pikashowtv.in','youcineapkpro.com','playfy.live'
+]);
+
+// Grouped lists per category so India view shows exactly these sites
+const INDIA_BY_CAT = {
+  movies: [
+    'prmovies.farm','desicinemas.pk','moviesbazar.su','bollyflix.at','netnaija.film','5movierulz.limited',
+    'vegamovie.ss','hindilinks4u.ventures','multimovies.wtf','kmmovies.life','new1.hdhub4u.limo','new3.movies4u.finance',
+    'moviesmod.at','world4ufree.at','net11.cc','fitnur.com','thenextplanet.surf','watch.yupflix.org','1tamilblasters.pro','cinephile.live'
+  ],
+  anime: [
+    'ag48anime.site','watchanimeworld.net','animejoker.com','desidubanime.me','animedekho.app','animelok.net','animesalt.ac','animepahe.pw','rareanimes.mov','animesogo.to'
+  ],
+  manga: ['natomanga.com'],
+  livetv: ['tarangplus.in'],
+  paid: ['hotstar.com','yupptv.com','shudder.com','hulu.com','netflix.com','viki.com','hbomax.com','tv.apple.com','primevideo.com','paramountplus.com','crunchyroll.com','mgmplus.com','peacocktv.com','amcplus.com','aha.video'],
+  apps: ['playtorrio.pages.dev','onstreamapks.app','uvotv.com','hdobox.net','beetvs.com.co','moviesbox.com.co','netmirror.gg','pikashowtv.in','youcineapkpro.com','playfy.live']
+};
+
+function prettyNameFromDomain(u) {
+  if (!u || typeof u !== 'string') return u || '';
+  const host = u.replace(/https?:\/\//, '').split('/')[0];
+  const parts = host.split('.');
+  if (parts.length >= 2) {
+    let label = parts[parts.length - 2];
+    label = label.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    return label;
+  }
+  return host;
+}
+
 /* ============================================================
    HELPERS
 ============================================================ */
@@ -260,7 +311,10 @@ function render() {
   let favsCount = 0;
   for (const cat of CATS) {
     let s = [...cat.sites];
-    if (region && region !== 'all') s = s.filter(x => x.region === region);
+    if (region === 'india') {
+      const list = INDIA_BY_CAT[cat.id] || [];
+      s = list.map(u => ({ n: prettyNameFromDomain(u), u }));
+    } else if (region && region !== 'all') s = s.filter(x => x.region === region);
     if (query) s = s.filter(x => x.n.toLowerCase().includes(query) || x.u.toLowerCase().includes(query));
     counts[cat.id] = s.length;
     total += s.length;
@@ -283,7 +337,12 @@ function render() {
   let seqTotal = 0;
   for (const cat of pool) {
     let sites = [...cat.sites];
-    if (region && region !== 'all') sites = sites.filter(s => s.region === region);
+    if (region === 'india') {
+      const list = INDIA_BY_CAT[cat.id] || [];
+      sites = list.map(u => ({ n: prettyNameFromDomain(u), u }));
+    } else if (region && region !== 'all') {
+      sites = sites.filter(s => s.region === region);
+    }
     if (curCat === 'favorites') sites = sites.filter(s => favs.has(fid(cat.id, s.u)));
     if (query) sites = sites.filter(s => s.n.toLowerCase().includes(query) || s.u.toLowerCase().includes(query));
     if (!sites.length) continue;
