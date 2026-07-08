@@ -392,10 +392,17 @@ function card(site, cat, idx) {
 
   const logoHtml = site.logo
     ? `<div class='logo-custom'>${site.logo}</div>`
-    : `<div class='logo-fallback' data-domain='${safeU}' data-letter='${escapeHtml(letter)}' data-bg='${escapeHtml(cat.logoBg)}' data-name='${safeN}'>
-        <div class='fallback-icon' aria-hidden='true'>
-          <!-- logo will be hydrated by JS: try local /logos/<domain> then site favicon, else letter -->
-          <div class='fallback-placeholder'></div>
+    : `<div class='logo-fallback'>
+        <div class='fallback-icon'>
+          <img class='logo-img'
+            src='https://logo.clearbit.com/${safeU}'
+            alt='${safeN}'
+            loading='lazy'
+            data-domain='${safeU}'
+            data-letter='${escapeHtml(letter)}'
+            data-bg='${escapeHtml(cat.logoBg)}'
+            data-tried='0'
+            onerror='logoErr(this)'/>
         </div>
         <span class='fallback-name-text'>${safeN}</span>
       </div>`;
@@ -583,110 +590,24 @@ function toggleTheme() {
 /* ============================================================
    LOGO ERROR
 ============================================================ */
-// Legacy logoErr removed. We'll use a robust logo loader instead.
-
-// Logo loader: hydrate all `.logo-fallback` placeholders with an image or letter.
-const LOGO_CACHE_KEY = 'sv_logo_cache_v1';
-function readLogoCache() {
-  try { return JSON.parse(localStorage.getItem(LOGO_CACHE_KEY) || '{}'); } catch (e) { return {}; }
-}
-function writeLogoCache(c) { try { localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify(c)); } catch (e) {} }
-
-function makeImg(src, alt) {
-  const img = document.createElement('img');
-  img.className = 'logo-img';
-  img.alt = alt || '';
-  img.loading = 'lazy';
-  img.src = src;
-  return img;
-}
-
-function renderLetterFallback(container, letter, bg) {
-  container.classList.add('letter');
+window.logoErr = function(img) {
+  const tried = parseInt(img.dataset.tried || '0', 10);
+  if (tried === 0) {
+    img.dataset.tried = '1';
+    const domain = img.dataset.domain || '';
+    img.src = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domain) + '&sz=128';
+    return;
+  }
+  const wrap = img.closest('.fallback-icon');
+  if (!wrap) return;
+  wrap.classList.add('letter');
   const div = document.createElement('div');
   div.className = 'fallback-letter';
-  div.style.background = bg || '#5b21b6';
-  div.textContent = (letter || '?').charAt(0).toUpperCase();
-  container.innerHTML = '';
-  container.appendChild(div);
+  div.style.background = img.dataset.bg || '#5b21b6';
+  div.textContent = img.dataset.letter || '?';
+  while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+  wrap.appendChild(div);
 }
-
-async function tryLoadImage(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(url);
-    img.onerror = () => reject(url);
-    img.src = url;
-  });
-}
-
-async function hydrateLogoElement(el) {
-  if (!el || el.dataset._hydrated) return;
-  const domain = el.dataset.domain || '';
-  const letter = el.dataset.letter || '';
-  const bg = el.dataset.bg || '';
-  const name = el.dataset.name || '';
-  const iconWrap = el.querySelector('.fallback-icon');
-  if (!iconWrap) return;
-
-  const cache = readLogoCache();
-  if (cache[domain] === 'none') {
-    renderLetterFallback(iconWrap, letter, bg);
-    el.dataset._hydrated = '1';
-    return;
-  }
-  if (cache[domain] && cache[domain] !== 'none') {
-    // cached url
-    const img = makeImg(cache[domain], name);
-    img.onerror = () => { renderLetterFallback(iconWrap, letter, bg); cache[domain] = 'none'; writeLogoCache(cache); };
-    iconWrap.innerHTML = ''; iconWrap.appendChild(img);
-    el.dataset._hydrated = '1';
-    return;
-  }
-
-  // Try local logos first
-  const localCandidates = [`/logos/${domain}.png`, `/logos/${domain}.svg`, `/logos/${domain}.webp`];
-  for (const url of localCandidates) {
-    try {
-      await tryLoadImage(url);
-      const img = makeImg(url, name);
-      iconWrap.innerHTML = ''; iconWrap.appendChild(img);
-      cache[domain] = url; writeLogoCache(cache);
-      el.dataset._hydrated = '1';
-      return;
-    } catch (e) { /* try next */ }
-  }
-
-  // Next, try the site's own favicon.ico
-  const siteFavicon = `https://${domain}/favicon.ico`;
-  try {
-    await tryLoadImage(siteFavicon);
-    const img = makeImg(siteFavicon, name);
-    iconWrap.innerHTML = ''; iconWrap.appendChild(img);
-    cache[domain] = siteFavicon; writeLogoCache(cache);
-    el.dataset._hydrated = '1';
-    return;
-  } catch (e) {
-    // give up and show letter
-    renderLetterFallback(iconWrap, letter, bg);
-    cache[domain] = 'none'; writeLogoCache(cache);
-    el.dataset._hydrated = '1';
-    return;
-  }
-}
-
-function hydrateAllLogos() {
-  document.querySelectorAll('.logo-fallback').forEach(el => {
-    hydrateLogoElement(el).catch(() => {});
-  });
-}
-
-// Run once after render
-document.addEventListener('DOMContentLoaded', hydrateAllLogos);
-// Also run after our render() call (which inserts cards)
-window.addEventListener('load', hydrateAllLogos);
-// and expose for manual calls (e.g., after dynamic re-renders)
-window.hydrateAllLogos = hydrateAllLogos;
 
 /* ============================================================
    KEYBOARD
