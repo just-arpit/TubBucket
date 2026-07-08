@@ -45,7 +45,7 @@
             <div class="logo-icon">
                 <img src="./logo.png" alt="TubBucket Logo">
             </div>
-            Tub<span class="logo-grad">Bucket</span>
+            TubBucket
         </a>
 
         <div class="nav-center">
@@ -62,7 +62,16 @@
                 ⭐ Favorites
                 <span class="badge" id="fnav">0</span>
             </button>
-            <button class="btn-icon" id="themeBtn" aria-label="Toggle theme">🌙</button>
+                        <!-- Region selector (placed near theme/favorites) -->
+                        <div class="region-select">
+                            <label for="regionSel" class="sr-only">Region</label>
+                            <select id="regionSel" aria-label="Select region">
+                                <option value="all">All regions</option>
+                                <option value="india">India</option>
+                            </select>
+                        </div>
+
+                        <button class="btn-icon" id="themeBtn" aria-label="Toggle theme">🌙</button>
         </div>
     </nav>
 

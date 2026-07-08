@@ -164,6 +164,9 @@ const CATS = [
       { n:'MGM+',         u:'mgmplus.com',        logo:'<span class="wm-text" style="color:#c9a86a;font-family:Georgia,serif">MGM+</span>' },
       { n:'Peacock',      u:'peacocktv.com',      logo:'<div style="border:1.4px solid #facc15;border-radius:6px;padding:.15rem .5rem;color:#fff;font-weight:700;font-size:.72rem">peacock</div>' },
       { n:'AMC+',         u:'amcplus.com',        logo:'<div style="border:1.4px solid #2dd4bf;border-radius:5px;padding:.15rem .55rem;color:#2dd4bf;font-weight:700;font-size:.74rem">amc+</div>' },
+      { n:'Hotstar',      u:'hotstar.com',       region:'india' },
+      { n:'YuppTV',       u:'yupptv.com',        region:'india' },
+      { n:'Aha',          u:'aha.video',         region:'india' },
     ]
   },
   {
@@ -177,18 +180,19 @@ const CATS = [
     cglw: '0 10px 36px rgba(236,72,153,.2)',
     desc: 'Native apps and APKs.',
     sites: [
-      { n:'PlayTorrio',    u:'playtorrio.pages.dev',          logo:'<div class="wm-row"><div style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem">▶</div><span class="wm-text" style="color:#fff">Play<span style="color:#a855f7">Torrio</span></span></div>' },
+      { n:'PlayTorrio',    u:'playtorrio.pages.dev', region:'india',          logo:'<div class="wm-row"><div style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem">▶</div><span class="wm-text" style="color:#fff">Play<span style="color:#a855f7">Torrio</span></span></div>' },
       { n:'OnStream APKs', u:'onstreamapks.app',              logo:'<svg class="wm-icon" viewBox="0 0 24 24" fill="#84cc16"><path d="M13 2L3 14h7l-1 8 11-14h-7l1-6z"/></svg>' },
       { n:'BeeTV',         u:'beetvs.com.co',                 logo:'<div class="wm-row"><span style="font-size:1.15rem">🐝</span></div>' },
       { n:'HDoBox',        u:'hdobox.net',                    logo:'<div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#f97316,#ea580c);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:.62rem">H▶</div>' },
       { n:'MovieBox',      u:'moviesbox.com.co',              logo:'<div class="wm-row"><span style="color:#2dd4bf;font-size:.95rem">▶</span><span class="wm-text" style="color:#fff">Movie<span style="color:#2dd4bf">Box</span></span></div>' },
       { n:'NetMirror',     u:'netmirror.gg',                  logo:'<span class="wm-text" style="color:#22c55e">NETMIRROR</span>' },
-      { n:'PikaShow',      u:'pikashowtv.in',                 logo:'<div style="display:flex;flex-direction:column;line-height:1.05;font-size:.7rem"><span style="color:#facc15;font-weight:900">PIKA</span><span style="color:#fff;font-weight:900">SHOW</span></div>' },
+      { n:'PikaShow',      u:'pikashowtv.in', region:'india',                logo:'<div style="display:flex;flex-direction:column;line-height:1.05;font-size:.7rem"><span style="color:#facc15;font-weight:900">PIKA</span><span style="color:#fff;font-weight:900">SHOW</span></div>' },
       { n:'MobiFlix',      u:'mobiflix.tv',                   logo:'<div class="wm-row"><span style="color:#facc15;font-size:.95rem">▶</span><span class="wm-text" style="color:#fff">Mobi<span style="color:#facc15">Flix</span></span></div>' },
-      { n:'YouCine APK',   u:'youcineapkpro.com', nw:true,    logo:'<div style="display:flex;flex-direction:column;line-height:1"><span style="color:#facc15;font-weight:900;font-size:.9rem">You</span><span style="color:#3b82f6;font-weight:900;font-size:.8rem">cine</span></div>' },
+      { n:'YouCine APK',   u:'youcineapkpro.com', nw:true, region:'india',    logo:'<div style="display:flex;flex-direction:column;line-height:1"><span style="color:#facc15;font-weight:900;font-size:.9rem">You</span><span style="color:#3b82f6;font-weight:900;font-size:.8rem">cine</span></div>' },
     ]
   },
 ];
+
 
 /* ============================================================
    SECURITY HELPERS
@@ -221,6 +225,12 @@ function loadFavs() {
 let favs   = loadFavs();
 let curCat = 'all';
 let query  = '';
+// region state (all | india)
+function loadRegion() {
+  try { const r = localStorage.getItem('sv_region'); return r || 'all'; } catch { return 'all'; }
+}
+function saveRegion(r) { try { localStorage.setItem('sv_region', r); } catch (e) {} }
+let region = loadRegion();
 
 /* ============================================================
    HELPERS
@@ -244,18 +254,40 @@ function updateBadges() {
 function render() {
   const main = $('content');
   if (!main) return;
-  const pool = (curCat === 'all' || curCat === 'favorites')
-    ? CATS : CATS.filter(c => c.id === curCat);
+  // compute counts per category taking region and search into account
+  const counts = {};
+  let total = 0;
+  let favsCount = 0;
+  for (const cat of CATS) {
+    let s = [...cat.sites];
+    if (region && region !== 'all') s = s.filter(x => x.region === region);
+    if (query) s = s.filter(x => x.n.toLowerCase().includes(query) || x.u.toLowerCase().includes(query));
+    counts[cat.id] = s.length;
+    total += s.length;
+    favsCount += s.filter(x => favs.has(fid(cat.id, x.u))).length;
+  }
 
-  let html = '', total = 0;
+  // update tab counts
+  document.querySelectorAll('.tab').forEach(t => {
+    const cat = t.dataset.cat;
+    const ct = t.querySelector('.tab-ct');
+    if (!ct) return;
+    if (cat === 'all') ct.textContent = total;
+    else if (cat === 'favorites') ct.textContent = favsCount;
+    else ct.textContent = counts[cat] || 0;
+  });
 
+  // now render visible categories based on curCat and region/query/favorites
+  const pool = (curCat === 'all' || curCat === 'favorites') ? CATS : CATS.filter(c => c.id === curCat);
+  let html = '';
+  let seqTotal = 0;
   for (const cat of pool) {
     let sites = [...cat.sites];
+    if (region && region !== 'all') sites = sites.filter(s => s.region === region);
     if (curCat === 'favorites') sites = sites.filter(s => favs.has(fid(cat.id, s.u)));
-    if (query) sites = sites.filter(s =>
-      s.n.toLowerCase().includes(query) || s.u.toLowerCase().includes(query));
+    if (query) sites = sites.filter(s => s.n.toLowerCase().includes(query) || s.u.toLowerCase().includes(query));
     if (!sites.length) continue;
-    total += sites.length;
+    seqTotal += sites.length;
 
     html += `<section class='cat-sec' id='cat-${escapeHtml(cat.id)}'>
       <div class='cat-head'>
@@ -267,7 +299,7 @@ function render() {
         <span class='cat-desc'>${escapeHtml(cat.desc)}</span>
       </div>
       <div class='sites-grid'>
-        ${sites.map((s, i) => card(s, cat, total - sites.length + i)).join('')}
+        ${sites.map((s, i) => card(s, cat, seqTotal - sites.length + i)).join('')}
       </div>
     </section>`;
   }
@@ -403,6 +435,18 @@ function initDelegation() {
 
   const scBtn = $('sc');
   if (scBtn) scBtn.addEventListener('click', clearSearch);
+
+  // region selector
+  const regionSel = $('regionSel');
+  if (regionSel) {
+    // initialize select value
+    regionSel.value = region || 'all';
+    regionSel.addEventListener('change', function() {
+      region = regionSel.value || 'all';
+      saveRegion(region);
+      render();
+    });
+  }
 
   const si = $('si');
   if (si) si.addEventListener('input', function() { doSearch(si); });
