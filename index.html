@@ -52,9 +52,6 @@
             <a href="#cat-movies" class="nav-link">Movies</a>
             <a href="#cat-anime" class="nav-link">Anime</a>
             <a href="#cat-manga" class="nav-link">Manga</a>
-            <a href="#cat-livetv" class="nav-link">Live TV</a>
-            <a href="#cat-paid" class="nav-link">Paid</a>
-            <a href="#cat-apps" class="nav-link">Apps</a>
         </div>
 
         <div class="nav-end">
@@ -62,16 +59,21 @@
                 ⭐ Favorites
                 <span class="badge" id="fnav">0</span>
             </button>
-                        <!-- Region selector (placed near theme/favorites) -->
-                        <div class="region-select">
-                            <label for="regionSel" class="sr-only">Region</label>
-                            <select id="regionSel" aria-label="Select region">
-                                <option value="all">All regions</option>
-                                <option value="india">India</option>
-                            </select>
-                        </div>
 
-                        <button class="btn-icon" id="themeBtn" aria-label="Toggle theme">🌙</button>
+            <!-- Custom region pill dropdown -->
+            <div class="region-select" id="regionSelect">
+                <button id="regionBtn" class="region-pill" aria-haspopup="menu" aria-expanded="false" type="button">
+                    <span class="region-icon" id="regionIcon">🌐</span>
+                    <span class="region-label" id="regionLabel">All regions</span>
+                    <span class="region-caret">▾</span>
+                </button>
+                <ul class="region-menu" id="regionMenu" role="menu" aria-labelledby="regionBtn">
+                    <li role="menuitem" data-value="all" class="region-item"><span class="menu-icon">🌐</span>All regions</li>
+                    <li role="menuitem" data-value="india" class="region-item"><span class="menu-icon">🇮🇳</span>India</li>
+                </ul>
+            </div>
+
+            <button class="btn-icon" id="themeBtn" aria-label="Toggle theme">🌙</button>
         </div>
     </nav>
 

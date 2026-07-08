@@ -495,15 +495,42 @@ function initDelegation() {
   const scBtn = $('sc');
   if (scBtn) scBtn.addEventListener('click', clearSearch);
 
-  // region selector
-  const regionSel = $('regionSel');
-  if (regionSel) {
-    // initialize select value
-    regionSel.value = region || 'all';
-    regionSel.addEventListener('change', function() {
-      region = regionSel.value || 'all';
+  // region selector (custom pill dropdown)
+  const regionBtn = $('regionBtn');
+  const regionMenu = $('regionMenu');
+  const regionIcon = $('regionIcon');
+  const regionLabel = $('regionLabel');
+  if (regionBtn && regionMenu) {
+    // initialize visuals
+    function updateRegionUI() {
+      regionIcon.textContent = region === 'india' ? '🇮🇳' : '🌐';
+      regionLabel.textContent = region === 'india' ? 'India' : 'All regions';
+      regionBtn.setAttribute('aria-expanded', 'false');
+      regionMenu.classList.remove('show');
+    }
+    updateRegionUI();
+
+    regionBtn.addEventListener('click', function(e) {
+      const open = regionMenu.classList.toggle('show');
+      regionBtn.setAttribute('aria-expanded', String(open));
+    });
+
+    regionMenu.addEventListener('click', function(e) {
+      const li = e.target.closest('.region-item');
+      if (!li) return;
+      const val = li.dataset.value || 'all';
+      region = val;
       saveRegion(region);
+      updateRegionUI();
       render();
+    });
+
+    // close when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!regionBtn.contains(e.target) && !regionMenu.contains(e.target)) {
+        regionMenu.classList.remove('show');
+        regionBtn.setAttribute('aria-expanded', 'false');
+      }
     });
   }
 
