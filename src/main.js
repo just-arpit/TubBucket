@@ -643,3 +643,28 @@ applyTheme();
 updateBadges();
 render();
 initDelegation();
+
+// Keep a CSS variable `--header-height` in sync with the rendered nav height
+function updateHeaderHeight() {
+  const nav = document.querySelector('.nav');
+  if (!nav) return;
+  const h = Math.ceil(nav.getBoundingClientRect().height || 0);
+  document.documentElement.style.setProperty('--header-height', h + 'px');
+}
+
+// initialize and keep updated on resize — debounce to avoid layout thrash
+updateHeaderHeight();
+let __rh_timer = null;
+window.addEventListener('resize', function() {
+  clearTimeout(__rh_timer);
+  __rh_timer = setTimeout(updateHeaderHeight, 120);
+});
+
+// also observe mutations to the nav (in case responsive styling changes its size)
+try {
+  const nav = document.querySelector('.nav');
+  if (nav && window.MutationObserver) {
+    const mo = new MutationObserver(() => updateHeaderHeight());
+    mo.observe(nav, { attributes: true, childList: false, subtree: false });
+  }
+} catch (e) {}

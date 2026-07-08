@@ -437,7 +437,8 @@ h1 {
 ============================================================ */
 .controls {
   position: sticky;
-  top: 72px;
+  /* top is computed dynamically via JS to match the actual header height */
+  top: var(--header-height, 72px);
   z-index: 200;
   background: var(--ctrl-bg);
   backdrop-filter: blur(28px);
